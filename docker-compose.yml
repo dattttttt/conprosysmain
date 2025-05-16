@@ -1,0 +1,58 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: omron_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://omron_mongo:27017/
+    networks:
+      - omron_network
+    depends_on:
+      - mongo
+    restart: always
+
+  mqtt_logger:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.mqtt
+    container_name: omron_mqtt_logger
+    environment:
+      - MONGO_URI=mongodb://omron_mongo:27017/
+    networks:
+      - omron_network
+    depends_on:
+      - mongo
+      - mqtt
+    restart: always
+
+  mongo:
+    image: mongo
+    container_name: omron_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d/
+    networks:
+      - omron_network
+    restart: always
+
+  mqtt:
+    build:
+      context: ./mqtt
+    container_name: omron_mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mqtt/config:/mosquitto/config/
+    networks:
+      - omron_network
+    restart: always
+
+networks:
+  omron_network:
+    driver: bridge
