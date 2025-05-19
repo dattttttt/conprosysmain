@@ -53,6 +53,18 @@ services:
       - omron_network
     restart: always
 
+  frontend:
+    build:
+      context: ./frontend
+    container_name: omron_frontend
+    ports:
+      - "8080:80"
+    networks:
+      - omron_network
+    depends_on:
+      - backend
+    restart: always
+
 networks:
   omron_network:
     driver: bridge

@@ -17,9 +17,12 @@ collection = db["sensor"]
 @app.route("/api/sensors", methods=["GET"])
 def get_sensors():
     try:
-        sensors = collection.find().limit(10)
+        # Lấy 10 document mới nhất
+        sensors = collection.find().sort("_id", -1).limit(10)
         response = []
         for sensor in sensors:
+            # Loại bỏ trường _id vì MongoDB trả về dạng ObjectId không tương thích
+            sensor["_id"] = str(sensor["_id"])
             response.append(sensor)
         return jsonify(response)
     except Exception as e:

@@ -1,0 +1,9 @@
+db.sensor.find().pretty()
+show collections
+use omron
+db.sensor.find().pretty()
+show collections
+show colections
+use omron
+show dbs
+show db

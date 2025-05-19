@@ -7,10 +7,8 @@ import os
 from datetime import datetime
 
 # Kết nối MongoDB
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://omron_mongo:27017/")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://omron_mongo:27017/omron")
 client = MongoClient(MONGO_URI)
-
-# Tạo database và collection
 db = client["omron"]
 collection = db["sensor"]
 
