@@ -1,5 +1,3 @@
-# backend/mqtt_logger.py
-
 import paho.mqtt.client as mqtt
 from pymongo import MongoClient
 import json
@@ -10,32 +8,51 @@ from datetime import datetime
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://omron_mongo:27017/omron")
 client = MongoClient(MONGO_URI)
 db = client["omron"]
-collection = db["sensor"]
 
-# Hàm xử lý khi nhận được message
+# MQTT callbacks
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("✅ MQTT kết nối thành công.")
+        client.subscribe("CPS/data")
+    else:
+        print(f"❌ MQTT lỗi kết nối. Mã: {rc}")
+
 def on_message(client, userdata, message):
     try:
-        # Giải mã payload từ thiết bị cảm biến
         payload = json.loads(message.payload.decode())
-        
-        # Thêm timestamp nếu chưa có
-        if "timestamp" not in payload:
-            payload["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        print(f"Received message: {payload}")
+        UUID = payload.get("UUID")
+        SN = payload.get("SN")
+        T = payload.get("T")
+        timestamp = payload.get("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
-        # Lưu vào MongoDB
-        result = collection.insert_one(payload)
-        print(f"Đã lưu vào MongoDB: {payload} với _id: {result.inserted_id}")
+        for sensor in payload.get("DATA", []):
+            sensor_type = sensor.get("NE").lower()  # e.g. "temperature"
+            value = sensor.get("V")
+
+            if sensor_type and value is not None:
+                doc = {
+                    "UUID": UUID,
+                    "SN": SN,
+                    "T": T,
+                    "timestamp": timestamp,
+                    "value": value
+                }
+                db[sensor_type].insert_one(doc)
+                print(f"📥 Lưu {sensor_type}: {value} → collection `{sensor_type}`")
+            else:
+                print("⚠️ Sensor data thiếu trường NE/V, bỏ qua.")
 
     except Exception as e:
-        print(f"Error processing message: {e}")
+        print(f"❌ Lỗi xử lý message: {e}")
 
-# Kết nối tới MQTT broker
+# Khởi tạo client MQTT
 mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
-mqtt_client.connect("omron_mqtt", 1883)
-mqtt_client.subscribe("CPS/data")
-print("🚀 Đang lắng nghe topic 'CPS/data'...")
 
-mqtt_client.loop_forever()
+try:
+    mqtt_client.connect("omron_mqtt", 1883)
+    print("🚀 Đang lắng nghe topic 'CPS/data'...")
+    mqtt_client.loop_forever()
+except Exception as e:
+    print(f"❌ Lỗi kết nối MQTT: {e}")

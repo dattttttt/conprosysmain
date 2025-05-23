@@ -4,21 +4,7 @@
       <h1>TOAMUSEN</h1>
     </header>
     <div class="main-container">
-      <aside class="sidebar">
-        <ul>
-          <li><router-link to="/">📊 概要</router-link></li>
-          <li><router-link :to="{ path: '/temperature' }">🌡️ 温度</router-link></li>
-          <li><router-link :to="{ path: '/humidity' }">💧 湿度</router-link></li>
-          <li><router-link :to="{ path: '/illuminance' }">💡 照度</router-link></li>
-          <li><router-link :to="{ path: '/pressure' }">🛠️ 大気圧</router-link></li>
-          <li><router-link :to="{ path: '/noise' }">🔊 音</router-link></li>
-          <li><router-link :to="{ path: '/etvoc' }">☁️ eTVOC</router-link></li>
-          <li><router-link :to="{ path: '/eco2' }">🌀 eCO2</router-link></li>
-          <li><router-link :to="{ path: '/discomfort' }">😅 不快感指数</router-link></li>
-          <li><router-link :to="{ path: '/heatstroke' }">🥵 熱中症リスクレベル</router-link></li>
-        </ul>
-      </aside>
-
+      <AppSidebar />
       <main class="content">
         <router-view />
       </main>
@@ -30,7 +16,12 @@
 </template>
 
 <script>
+import AppSidebar from './components/AppSidebar.vue';
+
 export default {
+  components: {
+    AppSidebar
+  },
   mounted() {
     this.updateDateTime();
     setInterval(this.updateDateTime, 1000);
@@ -73,68 +64,75 @@ body, html {
 }
 
 .header {
-  background-color: #333;
+  background: linear-gradient(to right, #00bcd4, #005f73);
   color: #fff;
-  padding: 20px;
+  padding: 6px 10px;
   text-align: center;
-  font-size: 36px;
+  font-size: 26px;
   font-weight: bold;
+  letter-spacing: 2px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  animation: fadeInDown 0.6s ease-out;
+  flex-shrink: 0;
 }
 
 .main-container {
   display: flex;
   flex: 1;
-}
-
-.sidebar {
-  width: 300px;
-  background-color: #333;
-  color: #fff;
-  padding: 20px;
-  min-height: calc(100vh - 80px);
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar ul li {
-  margin-bottom: 15px;
-}
-
-.sidebar ul li a {
-  color: #fff;
-  text-decoration: none;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #444;
-  border-radius: 8px;
-}
-
-.sidebar ul li a:hover {
-  background-color: #555;
-  color: #00bcd4;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .content {
   flex: 1;
-  padding: 20px;
+  padding: 16px;
   background-color: #1e1e1e;
-  border-radius: 10px;
+  border-radius: 8px;
   margin: 0;
-  min-height: calc(100vh - 80px);
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .footer {
-  background-color: #333;
+  background: linear-gradient(to right, #005f73, #00bcd4);
   color: #fff;
-  padding: 20px;
+  padding: 14px 24px;
   text-align: center;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
-  margin-top: auto;
+  box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.25);
+  animation: fadeInUp 0.6s ease-out;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.main-container {
+  padding-bottom: 60px;
+  /* đảm bảo nội dung không bị footer che */
+}
+
+@keyframes fadeInDown {
+  from {
+    transform: translateY(-30%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(30%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 </style>

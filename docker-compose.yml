@@ -41,8 +41,7 @@ services:
     restart: always
 
   mqtt:
-    build:
-      context: ./mqtt
+    image: eclipse-mosquitto:2.0
     container_name: omron_mqtt
     ports:
       - "1883:1883"
